@@ -1,5 +1,6 @@
-# ---- Data (do not commit raw/large data) ----
-data/raw/*
+# ---- Data ----
+# The raw CSV IS committed: 1.7MB synthetic Kaggle data -> repo is fully
+# reproducible and CI/Docker builds are self-contained. Derived data is not.
 data/interim/*
 data/processed/*
 !data/**/.gitkeep

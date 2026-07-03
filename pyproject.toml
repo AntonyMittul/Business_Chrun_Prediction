@@ -11,6 +11,9 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+# Notebooks are display artifacts: semicolon-suppressed matplotlib output and
+# wide result lines are intentional there.
+extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

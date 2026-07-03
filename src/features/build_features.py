@@ -26,7 +26,7 @@ TENURE_LABELS = ["01-06", "07-12", "13-24", "25-36", "37+"]
 
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
     """Add engineered features and drop proven-noise columns."""
-    df = df.drop(columns=DROP_NOISE).copy()
+    df = df.drop(columns=DROP_NOISE, errors="ignore").copy()
 
     # --- Threshold flags (Phase 3: effects are step-shaped, not linear) ---
     df["is_new_customer"] = (df["tenure_months"] <= 6).astype("int8")      # 28% churn

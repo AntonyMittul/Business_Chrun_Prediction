@@ -25,5 +25,5 @@ REPORTS_DIR = PROJECT_ROOT / "reports"
 
 def load_config(path: Path | str = CONFIG_PATH) -> dict:
     """Load config.yaml as a dict."""
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)

@@ -54,4 +54,6 @@ mlflow:
 
 genai:
   provider: gemini
-  model: gemini-3.1-flash   # key in .env (GEMINI_API_KEY); falls back to rule-based advice without one
+  # NOTE: plain "gemini-3.1-flash" does not exist on the API (only -lite variants);
+  # this alias always resolves to the newest stable flash model.
+  model: gemini-flash-latest   # key in .env (GEMINI_API_KEY); falls back to rule-based advice without one

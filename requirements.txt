@@ -47,12 +47,14 @@ fastapi>=0.110
 uvicorn>=0.29
 streamlit>=1.34
 
-# ---- Monitoring (Phase 6) ----
-evidently>=0.4
+# ---- Monitoring & orchestration (Phase 7) ----
+evidently>=0.7
+prefect>=3.0
 
 # ---- Dev tooling ----
 jupyterlab>=4.1
 pytest>=8.1
+httpx>=0.27          # FastAPI TestClient
 pre-commit>=3.7
 ruff>=0.4
 black>=24.0

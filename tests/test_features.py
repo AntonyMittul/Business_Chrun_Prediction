@@ -1,6 +1,5 @@
 """Tests for the feature-engineering pipeline."""
 import numpy as np
-import pandas as pd
 import pytest
 
 from src.data.clean_data import clean

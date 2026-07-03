@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 
 from dotenv import load_dotenv
 
@@ -106,22 +107,27 @@ def advise(customer: dict, drivers: list[dict], proba: float) -> dict:
     prompt = PROMPT_TEMPLATE.format(
         proba=proba, customer=json.dumps(customer), drivers=json.dumps(drivers)
     )
-    try:
-        from google import genai
+    last_err: Exception | None = None
+    for attempt in range(3):  # transient 5xx from the API are common; retry briefly
+        try:
+            from google import genai
 
-        client = genai.Client(api_key=api_key)
-        resp = client.models.generate_content(
-            model=cfg["genai"]["model"],
-            contents=prompt,
-            config={"response_mime_type": "application/json", "temperature": 0.3},
-        )
-        result = json.loads(resp.text)
-        result["source"] = cfg["genai"]["model"]
-        return result
-    except Exception as err:  # API/parse failure -> still deliver a usable plan
-        out = _fallback(customer, drivers, proba)
-        out["source"] += f" | gemini error: {type(err).__name__}"
-        return out
+            client = genai.Client(api_key=api_key)
+            resp = client.models.generate_content(
+                model=cfg["genai"]["model"],
+                contents=prompt,
+                config={"response_mime_type": "application/json", "temperature": 0.3},
+            )
+            result = json.loads(resp.text)
+            result["source"] = cfg["genai"]["model"]
+            return result
+        except Exception as err:  # noqa: BLE001 - any failure -> retry, then fallback
+            last_err = err
+            time.sleep(1.5 * (attempt + 1))
+
+    out = _fallback(customer, drivers, proba)
+    out["source"] += f" | gemini error: {type(last_err).__name__}"
+    return out
 
 
 if __name__ == "__main__":

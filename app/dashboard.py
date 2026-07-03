@@ -1,0 +1,93 @@
+"""Streamlit retention dashboard.
+
+Run:  streamlit run app/dashboard.py
+"""
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import joblib
+import pandas as pd
+import streamlit as st
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from src.genai.advisor import advise  # noqa: E402
+from src.models.explain import ChurnExplainer  # noqa: E402
+
+st.set_page_config(page_title="Churn Retention Dashboard", layout="wide")
+
+PROFILE_COLS = ["customer_segment", "tenure_months", "monthly_fee", "csat_score",
+                "payment_failures", "last_login_days_ago", "monthly_logins"]
+
+
+@st.cache_resource(show_spinner="Loading model & explainer...")
+def load_resources():
+    model = joblib.load(ROOT / "models" / "churn_model.joblib")
+    meta = json.loads((ROOT / "models" / "model_meta.json").read_text())
+    df = pd.read_parquet(ROOT / "data" / "processed" / "churn_features.parquet")
+    explainer = ChurnExplainer()
+    X = df[meta["features"]]
+    scores = model.predict_proba(X)[:, 1]
+    return model, meta, df.assign(churn_probability=scores), explainer
+
+
+model, meta, book, explainer = load_resources()
+threshold = meta["threshold"]
+
+st.title("📉 Customer Churn — Retention Command Center")
+st.caption("Calibrated LightGBM · profit-optimal threshold · SHAP drivers · GenAI retention plans")
+
+# ---- KPIs ----
+targeted = book[book["churn_probability"] >= threshold]
+k1, k2, k3, k4 = st.columns(4)
+k1.metric("Customers", f"{len(book):,}")
+k2.metric("Flagged for retention", f"{len(targeted):,}",
+          f"{len(targeted) / len(book):.0%} of book")
+k3.metric("MRR at risk (flagged)", f"${targeted['monthly_fee'].sum():,}")
+profit_mult = meta["test_profit_at_threshold"] / max(meta["test_profit_at_default_0.5"], 1)
+k4.metric("Model quality", f"AUC {meta['test_roc_auc']:.3f}",
+          f"profit x{profit_mult:.1f} vs default")
+
+# ---- Risk distribution ----
+st.subheader("Risk distribution")
+hist = (book["churn_probability"].mul(100).pipe(pd.cut, bins=range(0, 105, 5))
+        .value_counts().sort_index())
+hist.index = [f"{i.left}-{i.right}%" for i in hist.index]
+st.bar_chart(hist, color="#c44e52")
+st.caption(f"Decision threshold: {threshold:.0%} — everyone right of it gets a retention offer.")
+
+# ---- Work queue ----
+st.subheader("Retention work queue (highest risk first)")
+queue = (book.sort_values("churn_probability", ascending=False)
+         [["customer_id", "churn_probability"] + PROFILE_COLS].head(25))
+st.dataframe(queue.style.format({"churn_probability": "{:.1%}"}), use_container_width=True)
+
+# ---- Drill-down ----
+st.subheader("Customer drill-down")
+cid = st.selectbox("Pick a customer", queue["customer_id"].tolist())
+row_full = book[book["customer_id"] == cid]
+row = row_full[meta["features"]]
+proba = float(row_full["churn_probability"].iloc[0])
+
+left, right = st.columns([1, 2])
+with left:
+    st.metric("Churn probability", f"{proba:.1%}",
+              "🚨 target" if proba >= threshold else "✅ no action")
+    st.write({c: row_full.iloc[0][c] for c in PROFILE_COLS})
+
+with right:
+    drivers = explainer.top_drivers(row, k=5)
+    st.write("**Why the model thinks so (SHAP):**")
+    st.dataframe(pd.DataFrame(drivers), use_container_width=True)
+
+    if st.button("🤖 Generate retention plan (Gemini)"):
+        profile = {c: (v.item() if hasattr(v := row_full.iloc[0][c], "item") else str(v))
+                   for c in PROFILE_COLS}
+        with st.spinner("Asking the advisor..."):
+            plan = advise(profile, drivers, proba)
+        st.success(f"source: {plan.get('source', '?')}")
+        st.json(plan)

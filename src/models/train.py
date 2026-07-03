@@ -17,7 +17,6 @@ from __future__ import annotations
 import json
 
 import joblib
-import mlflow
 import numpy as np
 import pandas as pd
 from lightgbm import LGBMClassifier
@@ -87,6 +86,8 @@ def pick_threshold(y_true: np.ndarray, proba: np.ndarray, cfg: dict) -> float:
 
 
 def main() -> None:
+    import mlflow  # imported here so serving images don't need the mlflow stack
+
     cfg = load_config()
     X, y = load_features()
     X_tr, X_te, y_tr, y_te = train_test_split(

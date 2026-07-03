@@ -1,5 +1,4 @@
 """Tests for the GenAI advisor's offline (rule-based) path — no API key needed."""
-import pytest
 
 from src.genai.advisor import _fallback, _risk_level, advise
 
