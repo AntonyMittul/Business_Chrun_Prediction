@@ -37,7 +37,17 @@ columns:
 modeling:
   primary_metric: pr_auc     # imbalanced target -> optimize PR-AUC, not accuracy
   cv_folds: 5
+  test_size: 0.20
+
+# Retention-offer economics (drive cost-sensitive threshold selection).
+# Assumptions are explicit and tunable — stated, not hidden.
+business:
+  offer_cost: 21     # 20% discount x 3 months on ~$35 avg monthly fee
+  save_value: 420    # ~12 months of retained revenue at avg fee
+  save_rate: 0.30    # fraction of true churners the offer actually saves
+  # expected value per true positive = save_value * save_rate - offer_cost = $84
+  # expected value per false positive = -offer_cost = -$21
 
 mlflow:
-  tracking_uri: ./mlruns
+  tracking_uri: sqlite:///mlflow.db   # view with: mlflow ui --backend-store-uri sqlite:///mlflow.db
   experiment_name: churn-prediction
