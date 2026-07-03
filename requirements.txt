@@ -9,6 +9,10 @@ numpy>=1.26
 pyyaml>=6.0
 python-dotenv>=1.0
 
+# ---- SQL analytics & data validation (Phase 1-2) ----
+duckdb>=1.0
+pandera>=0.19
+
 # ---- Visualization ----
 matplotlib>=3.8
 seaborn>=0.13
@@ -29,8 +33,10 @@ optuna>=3.6              # hyperparameter tuning
 mlflow>=2.12
 shap>=0.45
 
-# ---- Big data (Phase 1-2) ----
-pyspark>=3.5
+# ---- Big data (Phase 4) ----
+# Spark 4.x supports Python 3.12/3.13; prefer Databricks Free Edition
+# for cluster work (avoids winutils setup on Windows).
+pyspark>=4.0
 
 # ---- GenAI layer (Phase 5) ----
 anthropic>=0.25

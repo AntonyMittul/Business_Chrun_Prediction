@@ -27,7 +27,8 @@ actionable retention recommendation.
 
 | Layer | Tools |
 |---|---|
-| Data engineering | PySpark, Parquet |
+| Data engineering | PySpark, Parquet, pandera (data validation) |
+| SQL analytics | DuckDB |
 | Analysis & statistics | pandas, SciPy, statsmodels, lifelines (survival analysis) |
 | Machine learning | scikit-learn, XGBoost, LightGBM, imbalanced-learn, Optuna |
 | Explainability & GenAI | SHAP, Anthropic API (retention recommendations) |
@@ -37,13 +38,14 @@ actionable retention recommendation.
 ## Roadmap
 
 - [x] **Phase 0** — Project setup & scaffolding
-- [ ] **Phase 1** — Data engineering & ingestion (PySpark)
-- [ ] **Phase 2** — Feature engineering (Spark SQL)
-- [ ] **Phase 3** — Statistics & probability (hypothesis testing, survival analysis)
-- [ ] **Phase 4** — Modeling & experiment tracking (MLflow)
-- [ ] **Phase 5** — Explainability (SHAP) + GenAI recommendations
-- [ ] **Phase 6** — Orchestration, deployment & monitoring
-- [ ] **Phase 7** — Polish, dashboard & write-up
+- [ ] **Phase 1** — Data cleaning & validation (pandas + pandera schema contract)
+- [ ] **Phase 2** — EDA + SQL analytics (DuckDB — business questions in pure SQL)
+- [ ] **Phase 3** — Statistics & probability (hypothesis testing, effect sizes, survival analysis)
+- [ ] **Phase 4** — Feature engineering + leakage audit (pandas → PySpark on Databricks)
+- [ ] **Phase 5** — Modeling, MLflow & cost-sensitive threshold tuning
+- [ ] **Phase 6** — Explainability (SHAP) + GenAI retention advisor
+- [ ] **Phase 7** — Deployment, CI/CD & monitoring
+- [ ] **Phase 8** — Polish, model card & write-up
 
 ## Project structure
 
