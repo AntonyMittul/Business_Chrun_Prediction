@@ -13,6 +13,11 @@ data:
   target: churn
   id_column: customer_id
 
+cleaning:
+  # total_revenue == monthly_fee * tenure_months exactly (verified, max diff 0)
+  drop_columns: [total_revenue]
+  clean_file: data/interim/churn_clean.parquet
+
 split:
   test_size: 0.20
   val_size: 0.20
@@ -24,7 +29,7 @@ columns:
   account: [tenure_months, signup_channel, contract_type]
   usage: [monthly_logins, weekly_active_days, avg_session_time, features_used,
           usage_growth_rate, last_login_days_ago]
-  billing: [monthly_fee, total_revenue, payment_method, payment_failures,
+  billing: [monthly_fee, payment_method, payment_failures,
             discount_applied, price_increase_last_3m]
   support: [support_tickets, avg_resolution_time, complaint_type, csat_score, escalations]
   marketing: [email_open_rate, marketing_click_rate, nps_score, survey_response, referral_count]

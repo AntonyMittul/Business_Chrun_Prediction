@@ -3,7 +3,7 @@
 Predicting customer churn for a subscription business, built as a **full data-science
 lifecycle**: data engineering → statistics → machine learning → MLOps → GenAI → deployment.
 
-> **Status:** 🚧 Phase 0 complete (project setup). See [Roadmap](#roadmap).
+> **Status:** 🚧 Phase 1 complete (clean, validated interim data). See [Roadmap](#roadmap).
 
 ---
 
@@ -38,7 +38,7 @@ actionable retention recommendation.
 ## Roadmap
 
 - [x] **Phase 0** — Project setup & scaffolding
-- [ ] **Phase 1** — Data cleaning & validation (pandas + pandera schema contract)
+- [x] **Phase 1** — Data cleaning & validation (pandas + pandera schema contract)
 - [ ] **Phase 2** — EDA + SQL analytics (DuckDB — business questions in pure SQL)
 - [ ] **Phase 3** — Statistics & probability (hypothesis testing, effect sizes, survival analysis)
 - [ ] **Phase 4** — Feature engineering + leakage audit (pandas → PySpark on Databricks)
@@ -72,9 +72,10 @@ Business_Chrun_Prediction/
 
 ```bash
 # 1. Create & activate a virtual environment
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # macOS/Linux
+#    (keep it OUTSIDE OneDrive-synced folders — sync file-locking breaks pip installs)
+python -m venv %USERPROFILE%\.venvs\churn
+%USERPROFILE%\.venvs\churn\Scripts\activate          # Windows
+# python -m venv .venv && source .venv/bin/activate  # macOS/Linux
 
 # 2. Install dependencies
 pip install -r requirements.txt
