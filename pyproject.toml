@@ -1,0 +1,19 @@
+[project]
+name = "business-churn-prediction"
+version = "0.1.0"
+description = "End-to-end customer churn prediction — EDA, statistics, ML, MLOps, and GenAI."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]          # lets tests do `from src... import ...`
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.black]
+line-length = 100

@@ -1,0 +1,38 @@
+# ============================================================
+# Central project configuration
+# ============================================================
+
+project:
+  name: business-churn-prediction
+  random_seed: 42
+
+data:
+  raw_file: data/raw/customer_churn_business_dataset.csv
+  interim_dir: data/interim
+  processed_dir: data/processed
+  target: churn
+  id_column: customer_id
+
+split:
+  test_size: 0.20
+  val_size: 0.20
+  stratify: true          # preserve 10.2% churn rate across splits
+
+# Column groups (mirrors the dataset schema; used across phases)
+columns:
+  demographics: [gender, age, country, city, customer_segment]
+  account: [tenure_months, signup_channel, contract_type]
+  usage: [monthly_logins, weekly_active_days, avg_session_time, features_used,
+          usage_growth_rate, last_login_days_ago]
+  billing: [monthly_fee, total_revenue, payment_method, payment_failures,
+            discount_applied, price_increase_last_3m]
+  support: [support_tickets, avg_resolution_time, complaint_type, csat_score, escalations]
+  marketing: [email_open_rate, marketing_click_rate, nps_score, survey_response, referral_count]
+
+modeling:
+  primary_metric: pr_auc     # imbalanced target -> optimize PR-AUC, not accuracy
+  cv_folds: 5
+
+mlflow:
+  tracking_uri: ./mlruns
+  experiment_name: churn-prediction
