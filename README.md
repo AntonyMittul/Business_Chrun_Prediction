@@ -3,7 +3,7 @@
 Predicting customer churn for a subscription business, built as a **full data-science
 lifecycle**: data engineering → statistics → machine learning → MLOps → GenAI → deployment.
 
-> **Status:** 🚧 Phase 3 complete (statistical inference + survival analysis). See [Roadmap](#roadmap).
+> **Status:** 🚧 Phase 4 complete (features engineered, leakage-audited: AUC 0.80, no leaks). See [Roadmap](#roadmap).
 >
 > **Headline findings so far:** churn concentrates in the first 6 months (28% vs 10%
 > baseline), after ≥2 payment failures (21–33%), at CSAT ≤ 2 (24–26%), and past 30 days
@@ -46,7 +46,7 @@ actionable retention recommendation.
 - [x] **Phase 1** — Data cleaning & validation (pandas + pandera schema contract)
 - [x] **Phase 2** — EDA + SQL analytics (DuckDB — business questions in pure SQL)
 - [x] **Phase 3** — Statistics & probability (hypothesis testing, effect sizes, survival analysis)
-- [ ] **Phase 4** — Feature engineering + leakage audit (pandas → PySpark on Databricks)
+- [x] **Phase 4** — Feature engineering + leakage audit (pandas → PySpark on Databricks)
 - [ ] **Phase 5** — Modeling, MLflow & cost-sensitive threshold tuning
 - [ ] **Phase 6** — Explainability (SHAP) + GenAI retention advisor
 - [ ] **Phase 7** — Deployment, CI/CD & monitoring
