@@ -39,8 +39,8 @@ shap>=0.45
 # for cluster work (avoids winutils setup on Windows).
 pyspark>=4.0
 
-# ---- GenAI layer (Phase 5) ----
-anthropic>=0.25
+# ---- GenAI layer (Phase 6) ----
+google-genai>=1.0
 
 # ---- Serving & app (Phase 6) ----
 fastapi>=0.110
