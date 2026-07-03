@@ -34,9 +34,7 @@ venv/
 env/
 .conda/
 
-# ---- Reports (keep figures folder, ignore heavy exports) ----
-reports/figures/*
-!reports/figures/.gitkeep
+# ---- Reports: figures are committed (portfolio assets, linked from README) ----
 
 # ---- Tooling ----
 .pytest_cache/
