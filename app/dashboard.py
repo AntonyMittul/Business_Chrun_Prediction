@@ -9,15 +9,15 @@ import sys
 import warnings
 from pathlib import Path
 
+import joblib
+import pandas as pd
+import streamlit as st
+
 # SHAP transforms to numpy before predict, so sklearn notes the missing
 # column names on every call — expected here, not actionable.
 warnings.filterwarnings(
     "ignore", message="X does not have valid feature names", category=UserWarning
 )
-
-import joblib
-import pandas as pd
-import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
