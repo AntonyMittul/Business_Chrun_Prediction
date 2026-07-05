@@ -6,7 +6,14 @@ from __future__ import annotations
 
 import json
 import sys
+import warnings
 from pathlib import Path
+
+# SHAP transforms to numpy before predict, so sklearn notes the missing
+# column names on every call — expected here, not actionable.
+warnings.filterwarnings(
+    "ignore", message="X does not have valid feature names", category=UserWarning
+)
 
 import joblib
 import pandas as pd
