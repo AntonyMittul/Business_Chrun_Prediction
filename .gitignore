@@ -36,7 +36,8 @@ venv/
 env/
 .conda/
 
-# ---- Reports: figures are committed (portfolio assets, linked from README) ----
+# ---- Reports: figures are committed (portfolio assets); generated HTML is not ----
+reports/drift_report.html
 
 # ---- Tooling ----
 .pytest_cache/

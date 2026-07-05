@@ -1,50 +1,138 @@
 # Business Churn Prediction — End-to-End Data Science Project
 
-Predicting customer churn for a subscription business, built as a **full data-science
-lifecycle**: data engineering → statistics → machine learning → MLOps → GenAI → deployment.
+[![CI](https://github.com/AntonyMittul/Business_Chrun_Prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/AntonyMittul/Business_Chrun_Prediction/actions)
 
-> **Status:** 🚧 Phase 7 complete — the model ships: FastAPI `/predict` (score → decision
-> → SHAP drivers → Gemini retention plan), self-training Docker image, green GitHub
-> Actions CI with container smoke test, Evidently drift report, Prefect retrain flow.
-> Model: **ROC-AUC 0.816, PR-AUC 0.351**, profit-optimal threshold = **7.1× more
-> retention profit** than default 0.5. See [Roadmap](#roadmap).
->
-> **Headline findings so far:** churn concentrates in the first 6 months (28% vs 10%
-> baseline), after ≥2 payment failures (21–33%), at CSAT ≤ 2 (24–26%), and past 30 days
-> of inactivity (~2×). Segment, contract, NPS and geography carry no signal —
-> **$35.3k/month MRR at risk.**
+Predicting customer churn for a subscription business, built as a **complete data-science
+lifecycle**: SQL analytics → statistical inference → feature engineering → calibrated ML →
+explainability → GenAI → a deployed, monitored, CI-tested service.
+
+**The result in one sentence:** a calibrated LightGBM (ROC-AUC **0.816**, PR-AUC **0.351**)
+whose profit-optimized decision threshold makes the retention campaign **7.1× more
+profitable** than the naive 0.5 cutoff, with every prediction explained by SHAP and turned
+into a concrete retention action by Gemini.
 
 ---
 
-## Problem
+## Architecture
 
-Retaining a customer is far cheaper than acquiring one. This project predicts which
-customers are likely to **churn**, explains *why*, and turns each prediction into an
-actionable retention recommendation.
+```mermaid
+flowchart LR
+    subgraph Data
+        RAW[Raw CSV<br/>10k customers] --> CLEAN[clean_data.py<br/>pandera contract]
+        CLEAN --> FEAT[build_features.py<br/>+ PySpark twin]
+    end
+    subgraph Analysis
+        FEAT --> SQL[DuckDB SQL<br/>analytics]
+        FEAT --> STATS[Statistics<br/>BH tests · survival · bootstrap]
+    end
+    subgraph Model
+        FEAT --> TRAIN[train.py<br/>LGBM + Optuna + isotonic]
+        TRAIN --> MLF[(MLflow<br/>sqlite)]
+        TRAIN --> THRESH[Profit-optimal<br/>threshold]
+    end
+    subgraph Serve
+        TRAIN --> API[FastAPI /predict]
+        API --> SHAP[SHAP drivers]
+        SHAP --> LLM[Gemini retention plan<br/>rule-based fallback]
+        TRAIN --> DASH[Streamlit dashboard]
+    end
+    subgraph Ops
+        CI[GitHub Actions<br/>lint · test · train · docker smoke] --- API
+        DRIFT[Evidently drift] --- FEAT
+        PREF[Prefect retrain flow] --- TRAIN
+    end
+```
+
+## Results
+
+| Metric | Value | Context |
+|---|---|---|
+| ROC-AUC (test) | **0.816** | honest performance on weak-signal data |
+| PR-AUC (test) | **0.351** | 3.4× the 10.2% no-skill baseline |
+| Brier score | **0.077** | isotonic-calibrated — probabilities are decision-grade |
+| Decision threshold | **0.16** | chosen on train-OOF profit, never on test |
+| Retention profit (test) | **$6,867 vs $966** | **7.1×** the default-0.5 threshold |
+| Churner recall at threshold | **82%** | catches 4 of 5 churners |
+
+## Key findings (SQL + statistics, before any ML)
+
+| Driver | Effect | Retention lever |
+|---|---|---|
+| First 6 months of tenure | **28.1%** churn (3× baseline; bootstrap CI 17–23pp) | onboarding program |
+| ≥ 2 payment failures | **21–33%** churn (sharp threshold at 2) | dunning flow at 2nd failure |
+| CSAT ≤ 2 | **24–26%** churn (strongest effect, d = −0.53) | CSAT-triggered save call |
+| Inactive > 30 days | **~2×** churn (invisible to global tests — threshold-shaped) | 30-day re-engagement |
+| **Compound** (low CSAT + payment issues) | **37.3%** churn | escalate to human specialist |
+| Segment, contract, NPS, ticket volume, geography | **flat ≈ 10%** — confirmed noise | none |
+
+Only 4 of 23 features survive Benjamini-Hochberg correction. Survival analysis (Cox):
+each +1 CSAT point cuts churn hazard **36%**; each payment failure adds **45%**.
+`total_revenue` was exactly `fee × tenure` (dropped); `city`×`country` pairs are
+independently random (geography = noise). **SMOTE was tested and lost** — imbalance is
+handled at the profit threshold instead.
+
+## The GenAI layer
+
+Every flagged customer gets: SHAP top-drivers → **Gemini** (`gemini-3.1-flash-lite`)
+→ a structured retention plan (risk level, plain-English drivers, actions each grounded
+in a driver). No API key? A rule-based fallback built from the statistical findings
+answers instead — the `source` field always tells you which path replied.
+
+## Quickstart
+
+```bash
+git clone https://github.com/AntonyMittul/Business_Chrun_Prediction
+cd Business_Chrun_Prediction
+
+# venv OUTSIDE OneDrive-synced folders (sync locking breaks pip)
+python -m venv %USERPROFILE%\.venvs\churn
+%USERPROFILE%\.venvs\churn\Scripts\activate
+pip install -r requirements.txt
+
+pytest                              # 23 tests
+python -m src.pipelines.flow        # Prefect: clean -> features -> train -> drift
+```
+
+| Want to... | Run |
+|---|---|
+| Serve the API | `uvicorn src.api.main:app` → http://127.0.0.1:8000/docs |
+| Open the dashboard | `run_dashboard.bat` (Windows) or `streamlit run app/dashboard.py` |
+| Browse experiments | `mlflow ui --backend-store-uri sqlite:///mlflow.db` |
+| Build the container | `docker build -t churn-api .` (trains at build time; smoke-tested in CI) |
+| GenAI plans | put `GEMINI_API_KEY=...` in `.env` (see `.env.example`) |
+
+## Repo tour
+
+```
+notebooks/           01 SQL analytics · 02 EDA · 03 statistics · 04 feature audit
+                     05 modeling · 06 SHAP + GenAI          (all executed, with outputs)
+src/data/            loading, cleaning, pandera schema contract
+src/features/        feature engineering (pandas + PySpark twin)
+src/models/          train.py (MLflow), explain.py (SHAP)
+src/genai/           Gemini retention advisor + fallback
+src/api/             FastAPI service
+src/monitoring/      Evidently drift report
+src/pipelines/       Prefect retrain flow
+app/                 Streamlit dashboard
+tests/               23 tests (data, features, model, API, advisor)
+reports/figures/     14 generated figures
+reports/MODEL_CARD.md  model card (intended use, metrics, limitations)
+```
 
 ## Dataset
 
 [Customer Churn Prediction Business Dataset](https://www.kaggle.com/datasets/miadul/customer-churn-prediction-business-dataset)
-(Kaggle, synthetic but business-realistic).
-
-- **10,000 customers × 32 columns**
-- **Target:** `churn` (binary) — **10.2% churn rate** (imbalanced → evaluated on PR-AUC, not accuracy)
-- **Feature families:** demographics · account/contract · product usage & engagement ·
-  billing & payments · support interactions · marketing & satisfaction
+(Kaggle, synthetic-but-realistic; 10,000 × 32, 10.21% churn). Committed to the repo
+(1.7MB) so everything — tests, CI, Docker build — is reproducible from a bare clone.
 
 ## Tech stack
 
-| Layer | Tools |
-|---|---|
-| Data engineering | PySpark, Parquet, pandera (data validation) |
-| SQL analytics | DuckDB |
-| Analysis & statistics | pandas, SciPy, statsmodels, lifelines (survival analysis) |
-| Machine learning | scikit-learn, XGBoost, LightGBM, imbalanced-learn, Optuna |
-| Explainability & GenAI | SHAP, Gemini API (retention recommendations, rule-based fallback) |
-| MLOps | MLflow, Airflow, Docker, GitHub Actions, Evidently |
-| Serving | FastAPI, Streamlit, Cloud Run |
+Python · pandas · **DuckDB** (SQL) · SciPy/statsmodels/**lifelines** (inference & survival)
+· scikit-learn · **LightGBM** · Optuna · imbalanced-learn · **MLflow** · **SHAP** ·
+**Gemini API** · pandera · **PySpark** · FastAPI · Streamlit · **Docker** ·
+**GitHub Actions** · Evidently · **Prefect**
 
-## Roadmap
+## Roadmap (complete)
 
 - [x] **Phase 0** — Project setup & scaffolding
 - [x] **Phase 1** — Data cleaning & validation (pandas + pandera schema contract)
@@ -54,49 +142,8 @@ actionable retention recommendation.
 - [x] **Phase 5** — Modeling, MLflow & cost-sensitive threshold tuning
 - [x] **Phase 6** — Explainability (SHAP) + GenAI retention advisor (Gemini)
 - [x] **Phase 7** — Deployment, CI/CD & monitoring (FastAPI · Docker · GitHub Actions · Evidently · Prefect)
-- [ ] **Phase 8** — Polish, model card & write-up
-
-## Project structure
-
-```
-Business_Chrun_Prediction/
-├── config/            # config.yaml — paths, target, column groups
-├── data/
-│   ├── raw/           # source CSV (gitignored)
-│   ├── interim/       # cleaned intermediate data
-│   └── processed/     # model-ready features
-├── notebooks/         # EDA & analysis notebooks
-├── src/
-│   ├── data/          # loading & validation
-│   ├── features/      # feature engineering
-│   ├── models/        # training & evaluation
-│   └── utils/         # config & paths
-├── tests/             # pytest smoke tests
-├── models/            # trained artifacts (gitignored)
-├── reports/figures/   # generated plots
-└── .github/workflows/ # CI
-```
-
-## Setup
-
-```bash
-# 1. Create & activate a virtual environment
-#    (keep it OUTSIDE OneDrive-synced folders — sync file-locking breaks pip installs)
-python -m venv %USERPROFILE%\.venvs\churn
-%USERPROFILE%\.venvs\churn\Scripts\activate          # Windows
-# python -m venv .venv && source .venv/bin/activate  # macOS/Linux
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. (Optional) enable auto-formatting on commit
-pre-commit install
-
-# 4. Sanity-check the data
-python -m src.data.load_data   # prints a dataset profile
-pytest                         # runs smoke tests
-```
+- [x] **Phase 8** — Polish, model card & write-up
 
 ## License
 
-For educational / portfolio use.
+Educational / portfolio use. Dataset © its Kaggle author.
