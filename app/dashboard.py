@@ -64,7 +64,7 @@ st.caption(f"Decision threshold: {threshold:.0%} — everyone right of it gets a
 st.subheader("Retention work queue (highest risk first)")
 queue = (book.sort_values("churn_probability", ascending=False)
          [["customer_id", "churn_probability"] + PROFILE_COLS].head(25))
-st.dataframe(queue.style.format({"churn_probability": "{:.1%}"}), use_container_width=True)
+st.dataframe(queue.style.format({"churn_probability": "{:.1%}"}), width="stretch")
 
 # ---- Drill-down ----
 st.subheader("Customer drill-down")
@@ -77,12 +77,13 @@ left, right = st.columns([1, 2])
 with left:
     st.metric("Churn probability", f"{proba:.1%}",
               "🚨 target" if proba >= threshold else "✅ no action")
-    st.write({c: row_full.iloc[0][c] for c in PROFILE_COLS})
+    st.write({c: (v.item() if hasattr(v := row_full.iloc[0][c], "item") else str(v))
+              for c in PROFILE_COLS})
 
 with right:
     drivers = explainer.top_drivers(row, k=5)
     st.write("**Why the model thinks so (SHAP):**")
-    st.dataframe(pd.DataFrame(drivers), use_container_width=True)
+    st.dataframe(pd.DataFrame(drivers), width="stretch")
 
     if st.button("🤖 Generate retention plan (Gemini)"):
         profile = {c: (v.item() if hasattr(v := row_full.iloc[0][c], "item") else str(v))
