@@ -3,9 +3,11 @@
 Predicting customer churn for a subscription business, built as a **full data-science
 lifecycle**: data engineering → statistics → machine learning → MLOps → GenAI → deployment.
 
-> **Status:** 🚧 Phase 6 complete — SHAP explanations + Gemini retention advisor on top
-> of the calibrated LightGBM (**ROC-AUC 0.816, PR-AUC 0.351**, profit-optimal threshold
-> = **7.1× more retention profit** than default 0.5). See [Roadmap](#roadmap).
+> **Status:** 🚧 Phase 7 complete — the model ships: FastAPI `/predict` (score → decision
+> → SHAP drivers → Gemini retention plan), self-training Docker image, green GitHub
+> Actions CI with container smoke test, Evidently drift report, Prefect retrain flow.
+> Model: **ROC-AUC 0.816, PR-AUC 0.351**, profit-optimal threshold = **7.1× more
+> retention profit** than default 0.5. See [Roadmap](#roadmap).
 >
 > **Headline findings so far:** churn concentrates in the first 6 months (28% vs 10%
 > baseline), after ≥2 payment failures (21–33%), at CSAT ≤ 2 (24–26%), and past 30 days
@@ -51,7 +53,7 @@ actionable retention recommendation.
 - [x] **Phase 4** — Feature engineering + leakage audit (pandas → PySpark on Databricks)
 - [x] **Phase 5** — Modeling, MLflow & cost-sensitive threshold tuning
 - [x] **Phase 6** — Explainability (SHAP) + GenAI retention advisor (Gemini)
-- [ ] **Phase 7** — Deployment, CI/CD & monitoring
+- [x] **Phase 7** — Deployment, CI/CD & monitoring (FastAPI · Docker · GitHub Actions · Evidently · Prefect)
 - [ ] **Phase 8** — Polish, model card & write-up
 
 ## Project structure
