@@ -1,6 +1,10 @@
 # Business Churn Prediction — End-to-End Data Science Project
 
 [![CI](https://github.com/AntonyMittul/Business_Chrun_Prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/AntonyMittul/Business_Chrun_Prediction/actions)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B?logo=streamlit)](https://businesschrunprediction-d5qzzmztbi7kbzurkbasvf.streamlit.app/)
+
+**🔴 Live demo:** [businesschrunprediction.streamlit.app](https://businesschrunprediction-d5qzzmztbi7kbzurkbasvf.streamlit.app/) —
+risk work-queue, per-customer SHAP drivers, and Gemini-generated retention plans.
 
 Predicting customer churn for a subscription business, built as a **complete data-science
 lifecycle**: SQL analytics → statistical inference → feature engineering → calibrated ML →
@@ -96,7 +100,7 @@ python -m src.pipelines.flow        # Prefect: clean -> features -> train -> dri
 | Want to... | Run |
 |---|---|
 | Serve the API | `uvicorn src.api.main:app` → http://127.0.0.1:8000/docs |
-| Open the dashboard | `run_dashboard.bat` (Windows) or `streamlit run app/dashboard.py` |
+| Open the dashboard | [live demo](https://businesschrunprediction-d5qzzmztbi7kbzurkbasvf.streamlit.app/) · locally: `run_dashboard.bat` |
 | Browse experiments | `mlflow ui --backend-store-uri sqlite:///mlflow.db` |
 | Build the container | `docker build -t churn-api .` (trains at build time; smoke-tested in CI) |
 | GenAI plans | put `GEMINI_API_KEY=...` in `.env` (see `.env.example`) |
