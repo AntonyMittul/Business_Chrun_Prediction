@@ -19,7 +19,8 @@ mlflow.db
 *.pkl
 *.joblib
 *.onnx
-!models/churn_model.joblib   # negation must follow the *.joblib pattern
+# negation must follow the *.joblib pattern above
+!models/churn_model.joblib
 
 # ---- Secrets & config ----
 .env
