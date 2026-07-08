@@ -1,0 +1,41 @@
+# ============================================================
+# FULL project stack: runtime + analysis + training + MLOps + dev tooling.
+# Install for local development and CI:  pip install -r requirements-dev.txt
+# ============================================================
+
+-r requirements.txt
+
+# ---- SQL analytics & visualization (Phases 2) ----
+duckdb>=1.0
+matplotlib>=3.8
+seaborn>=0.13
+
+# ---- Statistics & probability (Phase 3) ----
+scipy>=1.12
+statsmodels>=0.14
+lifelines>=0.28          # survival analysis (Kaplan-Meier, Cox)
+
+# ---- Machine learning extras (Phase 5) ----
+xgboost>=2.0
+imbalanced-learn>=0.12   # SMOTE comparison
+optuna>=3.6              # hyperparameter tuning
+
+# ---- Experiment tracking (Phase 5) ----
+mlflow>=2.12
+
+# ---- Big data (Phase 4) ----
+# Spark 4.x supports Python 3.12/3.13; prefer Databricks Free Edition
+# for cluster work (avoids winutils setup on Windows).
+pyspark>=4.0
+
+# ---- Monitoring & orchestration (Phase 7) ----
+evidently>=0.7
+prefect>=3.0
+
+# ---- Dev tooling ----
+jupyterlab>=4.1
+pytest>=8.1
+httpx>=0.27              # FastAPI TestClient
+pre-commit>=3.7
+ruff>=0.4
+black>=24.0

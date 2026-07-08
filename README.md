@@ -87,7 +87,7 @@ cd Business_Chrun_Prediction
 # venv OUTSIDE OneDrive-synced folders (sync locking breaks pip)
 python -m venv %USERPROFILE%\.venvs\churn
 %USERPROFILE%\.venvs\churn\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # full stack; requirements.txt = lean runtime only
 
 pytest                              # 23 tests
 python -m src.pipelines.flow        # Prefect: clean -> features -> train -> drift

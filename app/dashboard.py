@@ -22,6 +22,15 @@ warnings.filterwarnings(
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+# Streamlit Cloud: bridge st.secrets -> env var so the Gemini advisor finds the key.
+import os  # noqa: E402
+
+if not os.getenv("GEMINI_API_KEY"):
+    try:
+        os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+    except (KeyError, FileNotFoundError):
+        pass  # advisor falls back to rule-based plans
+
 from src.genai.advisor import advise  # noqa: E402
 from src.models.explain import ChurnExplainer  # noqa: E402
 
